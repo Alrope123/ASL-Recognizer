@@ -1,5 +1,8 @@
 import torch
 import torch.optim as optim
+import torchvision
+import matplotlib.pyplot as plt
+import numpy as np
 import util
 import data
 import argparse
@@ -9,7 +12,7 @@ from run import train, test
 
 def main(dir):
     BATCH_SIZE = 256
-    EPOCHS = 5
+    EPOCHS = 50
     LEARNING_RATE = 0.01
     MOMENTUM = 0.9
     SEED = 0
@@ -27,16 +30,27 @@ def main(dir):
     print('Using device', device)
     print(torch.cuda.get_device_name(0))
 
-    train_transform, test_trasnform = util.get_transforms("Alphabet")
-
+    
     print("Loading the data...")
+    train_transform, test_trasnform = util.get_transforms("Alphabet")
     train_loader, test_loader = data.load_alphabet(dir, BATCH_SIZE, train_transform=train_transform, test_transform=test_trasnform)
     print(len(train_loader))
     print(len(test_loader))
 
+    # dataiter = iter(train_loader)
+    # images, labels = dataiter.next()
+    # print(images.size())
+
+    # def imshow(img):
+    #     npimg = img.numpy()
+    #     plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    #     plt.show()
+
+    # # show images
+    # imshow(torchvision.utils.make_grid(images))
+
     model = ASLImagenetNet().to(device)
     print("training a network with {} parameters...".format(sum([1 for _ in model.parameters()])))
-    optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
     start_epoch = model.load_last_model(LOG_PATH)
     
     print("Trying to find the old logs...")
@@ -49,6 +63,12 @@ def main(dir):
 
     print("Starting training...")
     for epoch in range(start_epoch + 1, EPOCHS + 1):
+        if epoch <= 15:
+            optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
+        elif epoch <= 35:
+            optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
+        else:
+            optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
         train_loss = train(model, device, train_loader, optimizer, epoch, int(max(1, len(train_loader) / 10)))
         test_loss, test_accuracy = test(model, device, test_loader)
         train_losses.append((epoch, train_loss))
