@@ -7,7 +7,7 @@ class ASLImagenetNet(nn.Module):
     def __init__(self):
         super(ASLImagenetNet, self).__init__()
         # TODO define the layers
-        self.conv0 = nn.Conv2d(3, 64, 3, stride=1, padding=1)
+        self.conv0 = nn.Conv2d(1, 64, 3, stride=1, padding=1)
         self.conv0_bn = nn.BatchNorm2d(64)
         self.pool0 = nn.MaxPool2d(2, 2)
         self.dropout0 = nn.Dropout(0.25)
