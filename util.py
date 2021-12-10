@@ -1,5 +1,6 @@
 from torchvision import transforms
 import torch
+import torch.nn.functional as F
 import os
 import glob
 import re
@@ -14,17 +15,17 @@ def get_transforms(name):
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
             transforms.Resize(80),
             # transforms.ColorJitter(brightness=0.5, contrast=0.1, saturation=0.1, hue=0.1),
-            transforms.Grayscale(1),
+            # transforms.Grayscale(1),
             transforms.RandomCrop(size=64, pad_if_needed=True),
             transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomRotation(degrees=10),
-            transforms.RandomPerspective(distortion_scale=0.5, p=0.5)
+            transforms.RandomRotation(degrees=20),
+            transforms.RandomPerspective(distortion_scale=0.5, p=0.7)
         ])
         test_trasnform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
             transforms.Resize(64),
-            transforms.Grayscale(1)
+            # transforms.Grayscale(1)
         ])
     elif name == "asl":
         train_transform = transforms.Compose([
@@ -33,17 +34,17 @@ def get_transforms(name):
             transforms.Resize(80),
             # transforms.Resize(64),
             # transforms.ColorJitter(brightness=0.5, contrast=0.1, saturation=0.1, hue=0.1),
-            transforms.Grayscale(1),
+            # transforms.Grayscale(1),
             transforms.RandomCrop(size=64, pad_if_needed=True),
             transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomRotation(degrees=10),
-            transforms.RandomPerspective(distortion_scale=0.5, p=0.5)
+            transforms.RandomRotation(degrees=20),
+            transforms.RandomPerspective(distortion_scale=0.5, p=0.7)
         ])
         test_trasnform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
             transforms.Resize(64),
-            transforms.Grayscale(1)
+            # transforms.Grayscale(1)
         ])
     elif name == "MNIST":
         train_transform = transforms.Compose([
@@ -59,6 +60,25 @@ def get_transforms(name):
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
     return train_transform, test_trasnform
+
+
+def loss(prediction, label, reduction='mean'):
+    loss_val = F.cross_entropy(prediction, label.squeeze(), reduction=reduction)
+    return loss_val
+
+def save_model(model, file_path, num_to_keep=1):
+    save(model, file_path, num_to_keep)
+    
+def save_best_model(model, accuracy, file_path, num_to_keep=1):
+    if model.accuracy == None or accuracy > model.accuracy:
+        model.accuracy = accuracy
+        save_model(model, file_path, num_to_keep)
+
+def load_model(model, file_path):
+    restore(model, file_path)
+
+def load_last_model(model, dir_path):
+    return restore_latest(model, dir_path)
 
 
 def restore(net, save_file):

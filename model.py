@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.models as models
 import util
 
 class ASLImagenetNet(nn.Module):
@@ -84,20 +85,54 @@ class ASLImagenetNet(nn.Module):
 
         return x4
 
-    def loss(self, prediction, label, reduction='mean'):
-        loss_val = F.cross_entropy(prediction, label.squeeze(), reduction=reduction)
-        return loss_val
 
-    def save_model(self, file_path, num_to_keep=1):
-        util.save(self, file_path, num_to_keep)
+class Darknet64(nn.Module):
+    def __init__(self, loss=nn.CrossEntropyLoss()):
+        super(Darknet64, self).__init__()
+        self.loss = loss
+        self.accuracy = None
+        self.conv1 = nn.Conv2d(3, 16, 3, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(16)
+
+        self.conv2 = nn.Conv2d(16, 32, 3, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(32)
+
+        self.conv3 = nn.Conv2d(32, 64, 3, padding=1, bias=False)
+        self.bn3 = nn.BatchNorm2d(64)
+
+        self.conv4 = nn.Conv2d(64, 128, 3, padding=1, bias=False)
+        self.bn4 = nn.BatchNorm2d(128)
+
+        self.conv5 = nn.Conv2d(128, 256, 3, padding=1, bias=False)
+        self.bn5 = nn.BatchNorm2d(256)
+
+        self.fc1 = nn.Linear(256, 1000)
+
+    def forward(self, x):
+        x = F.max_pool2d(F.relu(self.bn1(self.conv1(x))), kernel_size=2, stride=2) # 32x32x16
+        x = F.max_pool2d(F.relu(self.bn2(self.conv2(x))), kernel_size=2, stride=2) # 16x16x32
+        x = F.max_pool2d(F.relu(self.bn3(self.conv3(x))), kernel_size=2, stride=2) # 8x8x64
+        x = F.max_pool2d(F.relu(self.bn4(self.conv4(x))), kernel_size=2, stride=2) # 4x4x128
+        x = F.max_pool2d(F.relu(self.bn5(self.conv5(x))), kernel_size=2, stride=2) # 2x2x256
+
+        # Global average pooling across each channel (Input could be 2x2x256, 4x4x256, 7x3x256, output would always be 256 length vector)
+        x = F.adaptive_avg_pool2d(x, 1)                                            # 1x1x256
+        x = torch.flatten(x, 1)                                                    # vector 256
         
-    def save_best_model(self, accuracy, file_path, num_to_keep=1):
-        if self.accuracy == None or accuracy > self.accuracy:
-            self.accuracy = accuracy
-            self.save_model(file_path, num_to_keep)
+        
+        x = self.fc1(x)
+        return x
 
-    def load_model(self, file_path):
-        util.restore(self, file_path)
 
-    def load_last_model(self, dir_path):
-        return util.restore_latest(self, dir_path)
+def Resnet():
+    resnet = models.resnet18(pretrained=True)
+    resnet.fc = nn.Linear(512, 26)
+    resnet.accuracy = None
+    return resnet
+
+def Resnext():
+    resnext = models.resnext50_32x4d(pretrained=True)
+    resnext.fc = nn.Linear(2048, 26)
+    resnext.accuracy = None
+    return resnext
+

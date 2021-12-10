@@ -1,6 +1,7 @@
 import time
 import torch
 import numpy as np
+import util
 from tqdm import tqdm
 
 
@@ -12,7 +13,7 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
         data, label = data.to(device), label.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = model.loss(output, label)
+        loss = util.loss(output, label)
         losses.append(loss.item())
         loss.backward()
         optimizer.step()
@@ -33,7 +34,7 @@ def test(model, device, test_loader, log_interval=None):
         for batch_idx, (data, label) in enumerate(tqdm(test_loader)):
             data, label = data.to(device), label.to(device)
             output = model(data)
-            test_loss_on = model.loss(output, label, reduction='sum').item()
+            test_loss_on = util.loss(output, label, reduction='sum').item()
             test_loss += test_loss_on
             pred = output.max(1)[1]
             correct_mask = pred.eq(label.view_as(pred))
