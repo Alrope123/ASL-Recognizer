@@ -7,24 +7,20 @@ import multiprocessing
 
 RATIO = 0.8
 
-def load_alphabet(dir, batch_size, train_transform=None, test_transform=None):
+def load_alphabet(dir, batch_size, train_transform=None, dev_transform=None):
     train_data = datasets.ImageFolder(root=os.path.join(dir, "Alphabet", "asl_alphabet_train"), transform=train_transform)
     train_data =  torch.utils.data.Subset(train_data, range(0, int(len(train_data) * RATIO)))
-    test_data = datasets.ImageFolder(root=os.path.join(dir, "Alphabet", "asl_alphabet_train"), transform=test_transform)
+    test_data = datasets.ImageFolder(root=os.path.join(dir, "Alphabet", "asl_alphabet_train"), transform=dev_transform)
     test_data =  torch.utils.data.Subset(test_data, range(int(len(train_data) * RATIO), len(test_data)))
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
     return train_loader, test_loader
 
 
-def load_asl(dir, batch_size, train_transform=None, test_transform=None):
-    train_data = datasets.ImageFolder(root=os.path.join(dir, "asl"), transform=train_transform)
-    train_data =  torch.utils.data.Subset(train_data, range(0, int(len(train_data) * RATIO)))
+def load_asl(dir, batch_size, test_transform=None):
     test_data = datasets.ImageFolder(root=os.path.join(dir, "asl"), transform=test_transform)
-    test_data =  torch.utils.data.Subset(test_data, range(int(len(train_data) * RATIO), len(test_data)))
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
-    return train_loader, test_loader
+    return test_loader
 
 
 class ASLMNISTDataset(torch.utils.data.Dataset):
@@ -33,9 +29,6 @@ class ASLMNISTDataset(torch.utils.data.Dataset):
         df = pd.read_csv(root)
         self.images = torch.tensor(df.iloc[:, 1:].values).view(-1, 1, 28, 28)
         self.labels = torch.tensor(df.iloc[:, 0].values)
-        # print(self.images.shape)
-        # print(self.labels.shape)
-
         
     def __len__(self):
         return self.labels.shape[0]
@@ -56,17 +49,5 @@ def load_mnist(dir, batch_size, train_transform=None, test_transform=None):
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
     return train_loader, test_loader
-
-
-# transform = transforms.Compose([
-#     transforms.ToTensor()
-# ])
-
-# trainloader, testloader = load_mnist("data", None, 32)
-# print(len(trainloader))
-# for i, (data, label) in enumerate(trainloader):
-#     if i==0:
-#         print(data.shape)
-#         print(label)
 
 

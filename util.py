@@ -14,52 +14,25 @@ def get_transforms(name):
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
             transforms.Resize(80),
-            # transforms.ColorJitter(brightness=0.5, contrast=0.1, saturation=0.1, hue=0.1),
-            # transforms.Grayscale(1),
             transforms.RandomCrop(size=64, pad_if_needed=True),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomRotation(degrees=20),
             transforms.RandomPerspective(distortion_scale=0.5, p=0.7)
         ])
-        test_trasnform = transforms.Compose([
+        dev_trasnform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
             transforms.Resize(64),
-            # transforms.Grayscale(1)
         ])
+        return train_transform, dev_trasnform
     elif name == "asl":
-        train_transform = transforms.Compose([
-           transforms.ToTensor(),
-            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-            transforms.Resize(80),
-            # transforms.Resize(64),
-            # transforms.ColorJitter(brightness=0.5, contrast=0.1, saturation=0.1, hue=0.1),
-            # transforms.Grayscale(1),
-            transforms.RandomCrop(size=64, pad_if_needed=True),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomRotation(degrees=20),
-            transforms.RandomPerspective(distortion_scale=0.5, p=0.7)
-        ])
         test_trasnform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
             transforms.Resize(64),
-            # transforms.Grayscale(1)
         ])
-    elif name == "MNIST":
-        train_transform = transforms.Compose([
-            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-            transforms.Grayscale(1),
-            transforms.ColorJitter(brightness=0.5, contrast=0.1, saturation=0.1, hue=0.1),
-            transforms.RandomCrop(size=28, pad_if_needed=True),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomRotation(degrees=10),
-            transforms.RandomPerspective(distortion_scale=0.5, p=0.5)
-        ])
-        test_trasnform = transforms.Compose([
-            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        ])
-    return train_transform, test_trasnform
+        return test_trasnform
+    
 
 
 def loss(prediction, label, reduction='mean'):

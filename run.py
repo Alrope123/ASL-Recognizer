@@ -52,3 +52,13 @@ def test(model, device, test_loader, log_interval=None):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset), test_accuracy))
     return test_loss, test_accuracy
+
+
+def inference(model, device, data):
+    model.eval()
+    with torch.no_grad():
+        data = data.to(device)
+        output = model(data)
+        p, pred = output.max(1)
+    
+    return p, pred
