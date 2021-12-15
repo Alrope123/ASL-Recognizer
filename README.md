@@ -29,4 +29,5 @@ https://user-images.githubusercontent.com/46021285/146103672-9679c686-2357-47c7-
 
 ## Demo
 Some recognization results running `webcam.py`:
+
 ![Semantic description of image](/demos/img0.png "demo 0") ![Semantic description of image](/demos/img1.png "demo 1")
