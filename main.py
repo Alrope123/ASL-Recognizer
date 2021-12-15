@@ -6,7 +6,7 @@ import numpy as np
 import util
 import data
 import argparse
-from model import ASLImagenetNet, Darknet64, Resnet, Resnext
+from model import ASLImagenetNet, Resnet, Resnext
 from run import train, test
 
 BATCH_SIZE = 256
