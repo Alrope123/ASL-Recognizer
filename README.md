@@ -1,6 +1,5 @@
 # ASL Recognizer
-
-https://user-images.githubusercontent.com/46021285/146103551-c63340f8-c7b9-4d61-b068-bee8dbb09f39.mp4
+https://user-images.githubusercontent.com/46021285/146103672-9679c686-2357-47c7-9039-c42331ddb362.mp4
 
 ## Abstract and Problem statement
 - This project aims to read in images of American Sign Language (ASL) alphabet and classify them into the corresponding letter.
